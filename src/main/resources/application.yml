@@ -1,0 +1,13 @@
+spring:
+  application:
+    name : Automated Ticketing System
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ordermanagement?createDatabaseIfNotExist=true
+    username: root
+    password: password
+  jpa:
+    show-sql: true
+    generate-ddl: true
+
+
