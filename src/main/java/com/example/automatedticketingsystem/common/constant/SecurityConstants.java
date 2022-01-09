@@ -1,4 +1,4 @@
-package com.example.automatedticketingsystem.securityConfig;
+package com.example.automatedticketingsystem.common.constant;
 
 public class SecurityConstants {
     public static final String SECRET = "SecretKeyToGenJWTs";

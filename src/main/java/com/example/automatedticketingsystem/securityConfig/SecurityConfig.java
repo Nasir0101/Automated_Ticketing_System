@@ -3,6 +3,7 @@ package com.example.automatedticketingsystem.securityConfig;
 import com.example.automatedticketingsystem.filter.AuthenticationFilter;
 import com.example.automatedticketingsystem.service.Implementations.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -11,6 +12,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Configuration
@@ -33,6 +40,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilter(new AuthenticationFilter(authenticationManager()))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.headers().frameOptions().disable();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        List<String> DEFAULT_PERMIT_ALL = new ArrayList<>();
+        DEFAULT_PERMIT_ALL.add("*");
+        List<String> DEFAULT_PERMIT_HEADER = new ArrayList<>();
+        DEFAULT_PERMIT_HEADER.add("Authorization");
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(DEFAULT_PERMIT_ALL);
+        configuration.setAllowedMethods(DEFAULT_PERMIT_ALL);
+        configuration.setAllowedHeaders(DEFAULT_PERMIT_ALL);
+        configuration.setMaxAge(1800L);
+        configuration.setExposedHeaders(DEFAULT_PERMIT_HEADER);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }

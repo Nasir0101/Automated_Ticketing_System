@@ -1,7 +1,7 @@
 package com.example.automatedticketingsystem.filter;
 
-import com.auth0.jwt.JWT;
-import com.example.automatedticketingsystem.entity.UserModel;
+import com.example.automatedticketingsystem.common.util.JwtUtil;
+import com.example.automatedticketingsystem.requestModel.LoginModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,10 +15,9 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Date;
 
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-import static com.example.automatedticketingsystem.securityConfig.SecurityConstants.*;
+import static com.example.automatedticketingsystem.common.constant.SecurityConstants.HEADER_STRING;
+import static com.example.automatedticketingsystem.common.constant.SecurityConstants.TOKEN_PREFIX;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
@@ -31,8 +30,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
         try {
-            UserModel creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), UserModel.class);
+            LoginModel creds = new ObjectMapper()
+                    .readValue(req.getInputStream(), LoginModel.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -49,11 +48,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) {
-        String token = JWT.create()
-                .withSubject(((User) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .withClaim("role", String.valueOf(auth.getAuthorities().toArray()[0]))
-                .sign(HMAC512(SECRET.getBytes()));
+        String userName = ((User) auth.getPrincipal()).getUsername();
+        String claim = String.valueOf(auth.getAuthorities().toArray()[0]);
+        String token = JwtUtil.generateToken(userName, claim);
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
     }
 
