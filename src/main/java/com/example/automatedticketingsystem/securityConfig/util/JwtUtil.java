@@ -1,16 +1,17 @@
-package com.example.automatedticketingsystem.common.util;
+package com.example.automatedticketingsystem.securityConfig.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.example.automatedticketingsystem.common.constant.SecurityConstants.*;
+import static com.example.automatedticketingsystem.securityConfig.constant.SecurityConstants.EXPIRATION_TIME;
+import static com.example.automatedticketingsystem.securityConfig.constant.SecurityConstants.SECRET;
 
 
 @Service
@@ -33,6 +34,13 @@ public class JwtUtil {
         return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
     }
 
+    public static List<SimpleGrantedAuthority> extractRole(String token) {
+        final Claims claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody();
+        return Arrays.stream(claims.get("role").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
     public static Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -44,7 +52,7 @@ public class JwtUtil {
     }
 
     private static String createToken(Map<String, Object> claims, String userName) {
-        return TOKEN_PREFIX + Jwts.builder().setClaims(claims).setSubject(userName).setIssuedAt(new Date(System.currentTimeMillis()))
+        return Jwts.builder().setClaims(claims).setSubject(userName).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET).compact();
     }

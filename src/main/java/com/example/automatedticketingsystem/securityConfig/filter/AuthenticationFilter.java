@@ -1,6 +1,6 @@
-package com.example.automatedticketingsystem.filter;
+package com.example.automatedticketingsystem.securityConfig.filter;
 
-import com.example.automatedticketingsystem.common.util.JwtUtil;
+import com.example.automatedticketingsystem.securityConfig.util.JwtUtil;
 import com.example.automatedticketingsystem.requestModel.LoginModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
-import static com.example.automatedticketingsystem.common.constant.SecurityConstants.HEADER_STRING;
-import static com.example.automatedticketingsystem.common.constant.SecurityConstants.TOKEN_PREFIX;
+import static com.example.automatedticketingsystem.securityConfig.constant.SecurityConstants.HEADER_STRING;
+import static com.example.automatedticketingsystem.securityConfig.constant.SecurityConstants.TOKEN_PREFIX;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;

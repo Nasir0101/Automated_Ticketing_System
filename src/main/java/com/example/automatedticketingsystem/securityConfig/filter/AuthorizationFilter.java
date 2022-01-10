@@ -1,13 +1,14 @@
-package com.example.automatedticketingsystem.filter;
+package com.example.automatedticketingsystem.securityConfig.filter;
 
-import com.example.automatedticketingsystem.common.constant.SecurityConstants;
-import com.example.automatedticketingsystem.common.util.JwtUtil;
-import com.example.automatedticketingsystem.service.Implementations.UserDetailsServiceImpl;
+import com.example.automatedticketingsystem.entity.UserModel;
+import com.example.automatedticketingsystem.repository.UserRepository;
+import com.example.automatedticketingsystem.securityConfig.constant.SecurityConstants;
+import com.example.automatedticketingsystem.securityConfig.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -15,14 +16,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
     @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository;
 
-    public AuthorizationFilter(AuthenticationManager authenticationManager) {
+    public AuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -46,11 +49,11 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
             token = token.replace(SecurityConstants.TOKEN_PREFIX, "");
             String userName = JwtUtil.extractUsername(token);
             Boolean isExpired = JwtUtil.isTokenExpired(token);
-
+            List<SimpleGrantedAuthority> authorities = JwtUtil.extractRole(token);
             if (userName != null && !isExpired) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
-                if (userDetails == null) return null;
-                return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UserModel userModel = userRepository.findByUserName(userName);
+                if (userModel == null) return null;
+                return new UsernamePasswordAuthenticationToken(userModel, null, authorities);
             }
         }
         return null;
